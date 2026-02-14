@@ -5,15 +5,15 @@ services:
     image: postgres:15-alpine
     container_name: shield_db
     environment:
-      POSTGRES_USER: shield
-      POSTGRES_PASSWORD: shield_dev_password
-      POSTGRES_DB: shield_db
+      POSTGRES_USER: ${POSTGRES_USER:-shield}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-shield_db}
     ports:
       - "5432:5432"
     volumes:
       - shield_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U shield -d shield_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-shield} -d ${POSTGRES_DB:-shield_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,11 +23,8 @@ services:
     container_name: shield_api
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql://shield:shield_dev_password@db:5432/shield_db
-      SECRET_KEY: dev-secret-key-not-for-production
-      CORS_ORIGINS: '["http://localhost:3000","http://localhost:5173"]'
-      ENVIRONMENT: development
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy

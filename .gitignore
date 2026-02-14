@@ -25,6 +25,8 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+test.db
+test_results.txt
 
 # Docker
 docker-compose.override.yml

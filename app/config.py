@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://shield:shield_dev_password@localhost:5432/shield_db"
 
     # JWT
-    SECRET_KEY: str = "dev-secret-key-change-in-production"
+    SECRET_KEY: str  # REQUIRED — set in .env file
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_DAYS: int = 30
 
