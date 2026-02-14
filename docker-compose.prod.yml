@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  # In production, use a managed database (RDS, Cloud SQL) instead of this container if possible.
+  # If using this container, ensure the volume is backed up.
+  db:
+    image: postgres:15-alpine
+    container_name: shield_db_prod
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - shield_pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: shield_api_prod
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      # Update strictly for your production frontend domain
+      CORS_ORIGINS: '["https://your-frontend-domain.com"]'
+      ENVIRONMENT: production
+      # Gunicorn workers (2-4 x CPU cores recommended)
+      WEB_CONCURRENCY: 4
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  shield_pgdata_prod:
