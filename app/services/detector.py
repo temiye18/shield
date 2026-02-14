@@ -26,8 +26,17 @@ def _create_analyzer() -> AnalyzerEngine:
     Tries: en_core_web_lg → en_core_web_sm → blank spacy model.
     """
     import spacy
+    import os
 
-    for model_name in ["en_core_web_lg", "en_core_web_sm"]:
+    # Check for env var override (e.g. SPACY_MODEL=en_core_web_sm)
+    preferred_model = os.getenv("SPACY_MODEL")
+    # Try large, then medium, then small
+    model_candidates = ["en_core_web_lg", "en_core_web_md", "en_core_web_sm"]
+    
+    if preferred_model:
+        model_candidates.insert(0, preferred_model)
+
+    for model_name in model_candidates:
         try:
             spacy.load(model_name)
             logger.info(f"Using SpaCy model: {model_name}")
@@ -38,6 +47,8 @@ def _create_analyzer() -> AnalyzerEngine:
             return AnalyzerEngine(nlp_engine=provider.create_engine())
         except OSError:
             logger.warning(f"SpaCy model '{model_name}' not found, trying next...")
+        except Exception as e:
+            logger.warning(f"Failed to load '{model_name}': {e}")
 
     # Last resort: blank model (regex-only detection, no NER for person names)
     logger.warning(
