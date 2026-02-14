@@ -141,9 +141,13 @@ pytest tests/ -v
 
 ### Render / Railway (Recommended)
 
-- **Build**: `pip install -r requirements.txt && python -m spacy download en_core_web_lg && alembic upgrade head`
-- **Start**: `gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000`
-- **Env vars**: Set `DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS` in the platform dashboard
+- **Build**: `pip install -r requirements.txt && python -m spacy download en_core_web_sm && alembic upgrade head`
+- **Start**: `gunicorn app.main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:10000 --timeout 120`
+- **Env vars**:
+  - `DATABASE_URL`: Your Supabase connection string
+  - `SECRET_KEY`: Random string
+  - `CORS_ORIGINS`: Allowed domains
+  - `SPACY_MODEL`: `en_core_web_sm` (Essential for Free Tier to save RAM)
 
 ### Docker
 
